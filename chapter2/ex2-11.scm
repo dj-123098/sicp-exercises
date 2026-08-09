@@ -1,0 +1,33 @@
+#lang sicp
+
+(define (make-interval a b) (cons a b))
+(define (upper-bound x) (cdr x))
+(define (lower-bound x) (car x))
+
+(define (add-interval x y)
+  (make-interval (+ (lower-bound x) (lower-bound y))
+                 (+ (upper-bound x) (upper-bound y))))
+(define (sub-interval x y)
+  (add-interval x
+                (make-interval (- (upper-bound y))
+                               (- (lower-bound y)))))
+(define (mul-interval x y)
+  (let ((a (lower-bound x))
+        (b (upper-bound x))
+        (c (lower-bound y))
+        (d (upper-bound y)))
+    (cond ((and (> a 0) (> c 0)) (make-interval (* a c) (* b d)))
+          ((and (> a 0) (<= c 0) (> d 0)) (make-interval (* b c) (* b d)))
+          ((and (> a 0) (<= d 0)) (make-interval (* b c) (* a d)))
+          ((and (<= a 0) (> b 0) (> c 0)) (make-interval (* a d) (* b d)))
+          ((and (<= a 0) (> b 0) (<= c 0) (> d 0)) (make-interval (min (* a d) (* b c)) (max (* a c) (* b d))))
+          ((and (<= a 0) (> b 0) (<= d 0)) (make-interval (* b c) (* a c)))
+          ((and (<= b 0) (> c 0)) (make-interval (* a d) (* b c)))
+          ((and (<= b 0) (<= c 0) (> d 0)) (make-interval (* a d) (* a c)))
+          ((and (<= b 0) (<= d 0)) (make-interval (* b d) (* a c))))))
+(define (div-interval x y)
+  (if (< (* (lower-bound y) (upper-bound y)) 0)
+      (error "divisor spans zero")
+      (mul-interval x
+                    (make-interval (/ 1.0 (upper-bound y))
+                                   (/ 1.0 (lower-bound y))))))
